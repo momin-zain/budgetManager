@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart ATM Simulator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #4b6cb7, #182848);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .atm-box {
+      background: #ffffff15;
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      width: 350px;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .back-arrow {
+      display: inline-block;
+      font-size: 24px;
+      cursor: pointer;
+      /* background: #f0f0f0; */
+      padding: 1px 4px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: black;
+      /* box-shadow: 0 2px 5px rgba(0,0,0,0.2); */
+      transition: background 0.3s;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: none;
+    }
+
+    .back-arrow:hover {
+      background: #d0d0d0;
+    }
+
+    h2, h3 {
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    button, input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    button {
+      background-color: #00b894;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #019875;
+      transform: scale(1.03);
+    }
+
+    input {
+      background-color: #f1f1f1;
+      color: #333;
+    }
+
+    #menu, .action, #loginBox {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    #msg {
+      margin-top: 20px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .success {
+      color: #2ecc71;
+    }
+    .error {
+      color: #e74c3c;
+    }
+
+    .action-title {
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 18px;
+      color: #ffd369;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <div class="atm-box">
+    <div class="back-arrow" id="backArrow" onclick="goBack()">←</div>
+
+    <h2>Welcome to Smart ATM</h2>
+    <div id="loginBox">
+      <input type="password" id="loginPin" placeholder="Enter your PIN to login" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <h3 id="actionTitle" class="action-title"></h3>
+
+    <div id="menu">
+      <button onclick="showAction('withdraw', 'Withdraw Cash')">Withdraw</button>
+      <button onclick="showAction('deposit', 'Deposit Cash')">Deposit</button>
+      <button onclick="showAction('balance', 'Balance Inquiry')">Check Balance</button>
+      <button onclick="showAction('pin', 'Change PIN')">Change PIN</button>
+      <button onclick="exitATM()">Exit</button>
+    </div>
+
+    <div id="actions">
+      <div id="withdraw" class="action">
+        <input type="password" id="wpin" placeholder="Enter PIN" />
+        <input type="number" id="wamt" placeholder="Withdraw Amount" />
+        <button onclick="withdrawCash()">Withdraw</button>
+      </div>
+
+      <div id="deposit" class="action">
+        <input type="password" id="dpin" placeholder="Enter PIN" />
+        <input type="number" id="damt" placeholder="Deposit Amount" />
+        <button onclick="depositCash()">Deposit</button>
+      </div>
+
+      <div id="balance" class="action">
+        <button onclick="checkBalance()">Check Balance</button>
+      </div>
+
+      <div id="pin" class="action">
+        <input type="password" id="npin1" placeholder="Enter New PIN" />
+        <input type="password" id="npin2" placeholder="Re-enter New PIN" />
+        <button onclick="changePin()">Change PIN</button>
+      </div>
+    </div>
+
+    <p id="msg"></p>
+  </div>
+
+  <script>
+    let balance = parseInt(localStorage.getItem("balance")) || 20000;
+    let pin = localStorage.getItem("pin") || "2233";
+    let sessionActive = false;
+
+    const $ = id => document.getElementById(id);
+
+    function login() {
+      const enteredPin = $("loginPin").value.trim();
+      if (enteredPin === pin) {
+        sessionActive = true;
+        $("loginBox").style.display = "none";
+        startATM();
+      } else {
+        showMessage("Incorrect PIN ❌", false);
+      }
+    }
+
+    function startATM() {
+      $("menu").style.display = "block";
+      $("actions").style.display = "none";
+      $("actionTitle").innerText = "";
+      $("backArrow").style.display = "none";
+      showMessage("ATM Started. Welcome!", true);
+    }
+
+    function showAction(id, title) {
+      $("menu").style.display = "none";
+      document.querySelectorAll(".action").forEach(div => div.style.display = "none");
+      $(id).style.display = "block";
+      $("actions").style.display = "block";
+      $("actionTitle").innerText = title;
+      $("msg").innerText = "";
+      $("backArrow").style.display = "inline-block";
+    }
+
+    function goBack() {
+      document.querySelectorAll(".action").forEach(div => div.style.display = "none");
+      $("actions").style.display = "none";
+      $("menu").style.display = "block";
+      $("actionTitle").innerText = "";
+      $("msg").innerText = "";
+      $("backArrow").style.display = "none";
+    }
+
+    function withdrawCash() {
+      const enteredPin = $("wpin").value.trim();
+      const amount = parseInt($("wamt").value);
+      if (!validatePin(enteredPin)) return;
+      if (!validateAmount(amount)) return;
+      if (amount > balance) return showMessage("Insufficient balance 🚫", false);
+
+      balance -= amount;
+      updateStorage();
+      showMessage(`Withdrawn ₹${amount}. New balance: ₹${balance}`, true);
+      resetInputs("wpin", "wamt");
+    }
+
+    function depositCash() {
+      const enteredPin = $("dpin").value.trim();
+      const amount = parseInt($("damt").value);
+      if (!validatePin(enteredPin)) return;
+      if (!validateAmount(amount)) return;
+
+      balance += amount;
+      updateStorage();
+      showMessage(`Deposited ₹${amount}. New balance: ₹${balance}`, true);
+      resetInputs("dpin", "damt");
+    }
+
+    function checkBalance() {
+      showMessage(`Current balance: ₹${balance}`, true);
+    }
+
+    function changePin() {
+      const new1 = $("npin1").value.trim();
+      const new2 = $("npin2").value.trim();
+
+      if (new1.length < 4 || new1 !== new2 || isNaN(new1)) {
+        return showMessage("PINs must match, be at least 4 digits, and numeric", false);
+      }
+
+      pin = new1;
+      updateStorage();
+      showMessage("PIN successfully changed 🔐", true);
+      resetInputs("npin1", "npin2");
+    }
+
+    function exitATM() {
+      if (confirm("Exit ATM?")) {
+        sessionActive = false;
+        $("menu").style.display = "none";
+        document.querySelectorAll(".action").forEach(div => div.style.display = "none");
+        $("actionTitle").innerText = "";
+        $("loginBox").style.display = "block";
+        $("actions").style.display = "none";
+        $("backArrow").style.display = "none";
+        showMessage("ATM exited. Please login again.", true);
+      }
+    }
+
+    function showMessage(message, isSuccess) {
+      const msg = $("msg");
+      msg.innerText = message;
+      msg.className = isSuccess ? "success" : "error";
+    }
+
+    function updateStorage() {
+      localStorage.setItem("balance", balance);
+      localStorage.setItem("pin", pin);
+    }
+
+    function resetInputs(...ids) {
+      ids.forEach(id => $(id).value = "");
+    }
+
+    function validateAmount(amount) {
+      if (isNaN(amount) || amount <= 0) {
+        showMessage("Invalid amount ⚠️", false);
+        return false;
+      }
+      return true;
+    }
+
+    function validatePin(inputPin) {
+      if (inputPin !== pin) {
+        showMessage("Incorrect PIN ❌", false);
+        return false;
+      }
+      return true;
+    }
+
+    window.onload = () => {
+      $("loginBox").style.display = "block";
+    };
+  </script>
+</body>
+</html>

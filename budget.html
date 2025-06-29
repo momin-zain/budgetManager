@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget Manager 💰</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form input,
+    .form select,
+    .form button {
+      flex: 1 1 45%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .form button {
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      flex: 1 1 100%;
+    }
+
+    .form button:hover {
+      background: #218838;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f8f9fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-left: 6px solid;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    li.income {
+      border-color: green;
+      color: green;
+    }
+
+    li.expense {
+      border-color: red;
+      color: red;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .delete-btn:hover {
+      color: darkred;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💰 Budget Manager</h1>
+
+    <div class="form">
+      <input type="text" id="desc" placeholder="Description" />
+      <input type="number" id="amount" placeholder="Amount" />
+      <select id="type">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <button onclick="addTransaction()">Add Transaction</button>
+    </div>
+
+    <div class="summary">
+      <div>Total Income: ₹<span id="total-income">0</span></div>
+      <div>Total Expense: ₹<span id="total-expense">0</span></div>
+      <div>Balance: ₹<span id="balance">0</span></div>
+    </div>
+
+    <ul id="transaction-list"></ul>
+  </div>
+
+  <script>
+    let income = 0;
+    let expense = 0;
+
+    function addTransaction() {
+      const desc = document.getElementById("desc").value.trim();
+      const amt = parseFloat(document.getElementById("amount").value);
+      const type = document.getElementById("type").value;
+
+      if (!desc || isNaN(amt) || amt <= 0) {
+        alert("Please enter valid description and amount.");
+        return;
+      }
+
+      const list = document.getElementById("transaction-list");
+
+      const li = document.createElement("li");
+      li.className = type;
+      li.innerHTML = `
+        ${desc}: ₹${amt}
+        <button class="delete-btn" onclick="deleteTransaction(this, ${amt}, '${type}')">×</button>
+      `;
+
+      list.appendChild(li);
+
+      if (type === "income") {
+        income += amt;
+      } else {
+        expense += amt;
+      }
+
+      updateSummary();
+
+      // Clear inputs
+      document.getElementById("desc").value = "";
+      document.getElementById("amount").value = "";
+    }
+
+    function deleteTransaction(button, amt, type) {
+      const li = button.parentElement;
+      li.remove();
+
+      if (type === "income") {
+        income -= amt;
+      } else {
+        expense -= amt;
+      }
+
+      updateSummary();
+    }
+
+    function updateSummary() {
+      document.getElementById("total-income").textContent = income;
+      document.getElementById("total-expense").textContent = expense;
+      document.getElementById("balance").textContent = income - expense;
+    }
+  </script>
+</body>
+</html>
