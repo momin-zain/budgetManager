@@ -2,24 +2,26 @@
       box-sizing: border-box;
     }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 20px;
-      /* justify-content: center; */
-      /* align-items: center; */
-      
-    }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    .container {
-      max-width: 600px;
-      margin:40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
+.container {
+  max-width: 900px; /* Increased from 600px */
+  width: 100%;
+  margin: 0 auto;   /* Centered horizontally, margin-top/bottom not needed with flex */
+  background: white;
+  padding: 40px;     /* Increased padding */
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
 
     h1 {
       text-align: center;
