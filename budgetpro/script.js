@@ -1,4 +1,4 @@
-let income = 0;
+ let income = 0;
     let expense = 0;
 
     function addTransaction() {
